@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Docker
+docker-data/
+
+# Prometheus temporary data
+prometheus_data/
+
+# Grafana generated files
+grafana_data/
+
+# Redis dump files
+dump.rdb
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

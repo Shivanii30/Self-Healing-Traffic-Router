@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --bind 0.0.0.0 --port 6379
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - routing-engine-service
+      - user-service
+      - payment-service
+      - order-service
+
+  routing-engine-service:
+    build: ./routing-engine-service
+    ports:
+      - "9000:9000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+
+  circuit-breaker-service:
+    build: ./circuit-breaker-service
+    ports:
+      - "9200:9200"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+
+  health-monitor-service:
+    build: ./health-monitor-service
+    ports:
+      - "9100:9100"
+    depends_on:
+      - redis
+      - user-service
+      - payment-service
+      - order-service
+      - circuit-breaker-service
+    environment:
+      - REDIS_HOST=redis
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8001:8001"
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8002:8002"
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8003:8003"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - routing-engine-service
+      - health-monitor-service
+      - circuit-breaker-service
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
